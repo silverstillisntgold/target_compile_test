@@ -1,0 +1,8 @@
+[package]
+name = "target_compile_test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fastxfix = "0.3"
+ya-rand = "2"
