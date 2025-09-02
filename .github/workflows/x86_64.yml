@@ -41,24 +41,20 @@ jobs:
 
     env:
       # Avoid shell-specific writes to $GITHUB_ENV; just set it for the whole job
-      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} -C linker=rust-lld
+      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} ${{ matrix.rustflags_extra }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      #- name: Install mold
-      #  if: ${{ matrix.setup_mold }}
-      #  uses: rui314/setup-mold@v1
+      - name: Install mold
+        if: ${{ matrix.setup_mold }}
+        uses: rui314/setup-mold@v1
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-
-      - name: Testing linker on linux
-        if: ${{ matrix.os_name }} == linux
-        run: rustup component add llvm-bitcode-linker-x86_64-unknown-linux-gnu
 
       - name: Update dependencies
         run: cargo update
