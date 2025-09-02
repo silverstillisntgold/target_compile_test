@@ -73,8 +73,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.feature_level }}.exe
-          path: target/release/target_compile_test
+          name: windows-${{ matrix.feature_level }}
+          path: target/release/target_compile_test.exe
           if-no-files-found: error
           retention-days: 1
 
