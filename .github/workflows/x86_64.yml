@@ -7,7 +7,6 @@ jobs:
     name: Build linux ${{ matrix.feature_level }}
 
     strategy:
-      fail-fast: false
       matrix:
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
 
@@ -45,7 +44,6 @@ jobs:
     name: Build windows ${{ matrix.feature_level }}
 
     strategy:
-      fail-fast: false
       matrix:
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
 
@@ -53,16 +51,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # TODO: Use LLD?
+      #- name: Try to use LLD xD
+      #  run: echo ""
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
-          # TODO: Move to gnullvm when its stabilized in rust 1.90
+          # TODO: Move to gnullvm when it's stabilized in rust 1.90
           toolchain: stable-x86_64-pc-windows-gnu
 
       - name: Set feature level
-        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }}" >> $GITHUB_ENV
+        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }} -C linker=rust-lld.exe" >> $GITHUB_ENV
 
       - name: Update dependencies
         run: cargo update
@@ -83,7 +82,6 @@ jobs:
     name: Build macos ${{ matrix.feature_level }}
 
     strategy:
-      fail-fast: false
       matrix:
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
 
