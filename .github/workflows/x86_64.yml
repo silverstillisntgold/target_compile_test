@@ -1,29 +1,55 @@
-name: ci
+name: Compile binaries
 on: [pull_request, push, workflow_dispatch]
 
 jobs:
-  build_linux_x64:
-    runs-on: ubuntu-24.04
-    name: Build linux ${{ matrix.feature_level }}
-
+  build:
+    name: Build ${{ matrix.os_name }} ${{ matrix.feature_level }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+        include:
+          - os_name: linux
+            runner: ubuntu-24.04
+            toolchain: stable-x86_64-unknown-linux-gnu
+            artifact_path: target/release/target_compile_test
+            artifact_prefix: linux
+            setup_mold: true
+            rustflags_extra: ""
+
+          - os_name: windows
+            runner: windows-2025
+            # TODO: Move to gnullvm toolchain when it's stabilized in rust 1.90
+            toolchain: stable-x86_64-pc-windows-gnu
+            artifact_path: target/release/target_compile_test.exe
+            artifact_prefix: windows
+            setup_mold: false
+            rustflags_extra: "-C linker=rust-lld"
+
+          - os_name: macos
+            runner: macos-13
+            toolchain: stable-x86_64-apple-darwin
+            artifact_path: target/release/target_compile_test
+            artifact_prefix: macos
+            setup_mold: false
+            rustflags_extra: ""
+
+    env:
+      # Avoid shell-specific writes to $GITHUB_ENV; just set it for the whole job
+      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} ${{ matrix.rustflags_extra }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Install mold
+        if: ${{ matrix.setup_mold }}
         uses: rui314/setup-mold@v1
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: stable-x86_64-unknown-linux-gnu
-
-      - name: Set feature level
-        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }}" >> $GITHUB_ENV
+          toolchain: ${{ matrix.toolchain }}
 
       - name: Update dependencies
         run: cargo update
@@ -34,76 +60,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.feature_level }}
-          path: target/release/target_compile_test
-          if-no-files-found: error
-          retention-days: 1
-
-  build_windows_x64:
-    runs-on: windows-2025
-    name: Build windows ${{ matrix.feature_level }}
-
-    strategy:
-      matrix:
-        feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          # TODO: Move to gnullvm toolchain when it's stabilized in rust 1.90
-          toolchain: stable-x86_64-pc-windows-gnu
-
-      - name: Set feature level
-        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }} -C linker=rust-lld" >> $GITHUB_ENV
-
-      - name: Update dependencies
-        run: cargo update
-
-      - name: Build
-        run: cargo build --release
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-${{ matrix.feature_level }}
-          path: target/release/target_compile_test.exe
-          if-no-files-found: error
-          retention-days: 1
-
-  build_macos_x64:
-    runs-on: macos-13
-    name: Build macos ${{ matrix.feature_level }}
-
-    strategy:
-      matrix:
-        feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable-x86_64-apple-darwin
-
-      - name: Set feature level
-        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }}" >> $GITHUB_ENV
-
-      - name: Update dependencies
-        run: cargo update
-
-      - name: Build
-        run: cargo build --release
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-${{ matrix.feature_level }}
-          path: target/release/target_compile_test
+          name: ${{ matrix.artifact_prefix }}-${{ matrix.feature_level }}
+          path: ${{ matrix.artifact_path }}
           if-no-files-found: error
           retention-days: 1
