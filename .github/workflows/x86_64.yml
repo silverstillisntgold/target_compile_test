@@ -73,7 +73,42 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.feature_level }}
+          name: windows-${{ matrix.feature_level }}
+          path: target/release/target_compile_test
+          if-no-files-found: error
+          retention-days: 1
+
+  build_macos_x64:
+    runs-on: macos-15-large
+    name: Build macos ${{ matrix.feature_level }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable-x86_64-apple-darwin
+
+      - name: Set feature level
+        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }}" >> $GITHUB_ENV
+
+      - name: Update dependencies
+        run: cargo update
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.feature_level }}
           path: target/release/target_compile_test
           if-no-files-found: error
           retention-days: 1
