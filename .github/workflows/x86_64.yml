@@ -51,17 +51,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      #- name: Try to use LLD xD
-      #  run: echo ""
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
-          # TODO: Move to gnullvm when it's stabilized in rust 1.90
+          # TODO: Move to gnullvm toolchain when it's stabilized in rust 1.90
           toolchain: stable-x86_64-pc-windows-gnu
 
       - name: Set feature level
-        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }} -C linker=rust-lld.exe" >> $GITHUB_ENV
+        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }} -C linker=rust-lld" >> $GITHUB_ENV
 
       - name: Update dependencies
         run: cargo update
