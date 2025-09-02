@@ -9,17 +9,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #target:
-        #  [
-        #    x86_64-unknown-linux-gnu,
-        #    x86_64-pc-windows-gnullvm,
-        #    x86_64-apple-darwin,
-        #
-        #    aarch64-apple-darwin,
-        #    aarch64-unknown-linux-gnu,
-        #    aarch64-pc-windows-gnullvm,
-        #  ]
-        # All modern x86 processors support at least v2
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
 
     steps:
@@ -33,6 +22,44 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable-x86_64-unknown-linux-gnu
+
+      - name: Set feature level
+        run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }}" >> $GITHUB_ENV
+
+      - name: Update dependencies
+        run: cargo update
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.feature_level }}
+          path: target/release/target_compile_test
+          if-no-files-found: error
+          retention-days: 1
+
+  build_windows_x64:
+    runs-on: windows-2025
+    name: Build windows ${{ matrix.feature_level }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # TODO: Use LLD?
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          # TODO: Move to gnullvm when its stabilized in rust 1.90
+          toolchain: stable-x86_64-pc-windows-gnu
 
       - name: Set feature level
         run: echo "RUSTFLAGS=-C target-cpu=${{ matrix.feature_level }}" >> $GITHUB_ENV
