@@ -3,7 +3,7 @@ on: [pull_request, push, workflow_dispatch]
 
 jobs:
   build:
-    name: Build ${{ matrix.os_name }} ${{ matrix.feature_level }}
+    name: Build ${{ matrix.os_name }}-${{ matrix.feature_level }}
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -13,38 +13,35 @@ jobs:
             runner: ubuntu-24.04
             toolchain: stable-x86_64-unknown-linux-gnu
             artifact_path: target/release/target_compile_test
-            artifact_prefix: linux
-            setup_mold: true
-            rustflags_extra: ""
+            #setup_mold: true
+            #rustflags_extra: ""
 
           - os_name: windows
             runner: windows-2025
             # TODO: Move to gnullvm toolchain when it's stabilized in rust 1.90
             toolchain: stable-x86_64-pc-windows-gnu
             artifact_path: target/release/target_compile_test.exe
-            artifact_prefix: windows
-            setup_mold: false
-            rustflags_extra: "-C linker=rust-lld"
+            #setup_mold: false
+            #rustflags_extra: "-C linker=rust-lld"
 
           - os_name: macos
             runner: macos-13
             toolchain: stable-x86_64-apple-darwin
             artifact_path: target/release/target_compile_test
-            artifact_prefix: macos
-            setup_mold: false
-            rustflags_extra: ""
+            #setup_mold: false
+            #rustflags_extra: ""
 
     env:
       # Avoid shell-specific writes to $GITHUB_ENV; just set it for the whole job
-      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} ${{ matrix.rustflags_extra }}
+      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} ${{ matrix.rustflags_extra }} -C linker=rust-lld
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install mold
-        if: ${{ matrix.setup_mold }}
-        uses: rui314/setup-mold@v1
+      #- name: Install mold
+      #  if: ${{ matrix.setup_mold }}
+      #  uses: rui314/setup-mold@v1
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
@@ -60,7 +57,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_prefix }}-${{ matrix.feature_level }}
+          name: ${{ matrix.os_name }}-${{ matrix.feature_level }}
           path: ${{ matrix.artifact_path }}
           if-no-files-found: error
           retention-days: 1
