@@ -36,7 +36,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Get target
-        run: rustup toolchain install ${{ matrix.target }}
+        run: rustup target install ${{ matrix.target }}
 
       - name: Update dependencies
         run: cargo update
