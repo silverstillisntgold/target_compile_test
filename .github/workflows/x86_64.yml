@@ -2,13 +2,47 @@ name: Compile binaries
 on: [pull_request, push, workflow_dispatch]
 
 jobs:
-  #build_v2:
-  #  name: Build 2
-  #  runs-on: ubuntu-24.04
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      rizz: [xs]
+  build_v2:
+    name: Build 2
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          [
+            x86_64-unknown-linux-gnu,
+            x86_64-pc-windows-gnullvm,
+            x86_64-apple-darwin,
+        
+            #aarch64-apple-darwin,
+            #aarch64-unknown-linux-gnu,
+            #aarch64-pc-windows-gnullvm,
+          ]
+        # All modern x86 processors support at least v2
+        feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+
+    env:
+      # Avoid shell-specific writes to $GITHUB_ENV; just set it for the whole job
+      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} -C linker=lld
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install lld
+        run: sudo apt-get update && sudo apt-get install lld
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Get target
+        run: rustup toolchain install ${{ matrix.target }}
+
+      - name: Update dependencies
+        run: cargo update
+
+      - name: Build
+        run: cargo build --target ${{ matrix.target }} --release
 
   build:
     name: Build ${{ matrix.os_name }}-${{ matrix.feature_level }}
