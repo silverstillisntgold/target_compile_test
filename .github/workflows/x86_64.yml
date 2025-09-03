@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #os: [linux, macos, windows, linux-arm, macos-arm, windows-arm]
+        os: [linux, macos, windows, linux-arm, macos-arm, windows-arm]
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
         include:
           - os: linux
@@ -23,7 +23,7 @@ jobs:
 
           - os: windows
             runner: windows-2025
-            toolchain: x86_64-pc-windows-gnu
+            toolchain: x86_64-pc-windows-gnullvm
             artifact_path: target/release/target_compile_test.exe
 
           - os: linux-arm
@@ -41,7 +41,7 @@ jobs:
           - os: windows-arm
             runner: windows-11-arm
             feature_level: generic
-            toolchain: aarch64-pc-windows-gnu
+            toolchain: aarch64-pc-windows-gnullvm
             artifact_path: target/release/target_compile_test.exe
 
     env:
