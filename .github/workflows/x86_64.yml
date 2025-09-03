@@ -28,21 +28,29 @@ jobs:
 
           - os: linux-arm
             runner: ubuntu-24.04-arm
-            feature_level: generic
             toolchain: aarch64-unknown-linux-gnu
             artifact_path: target/release/target_compile_test
+            feature_level: generic
 
           - os: macos-arm
             runner: macos-15
-            feature_level: generic
             toolchain: aarch64-apple-darwin
             artifact_path: target/release/target_compile_test
+            feature_level: generic
 
           - os: windows-arm
             runner: windows-11-arm
-            feature_level: generic
             toolchain: aarch64-pc-windows-gnullvm
             artifact_path: target/release/target_compile_test.exe
+            feature_level: generic
+
+        exclude:
+          - os: linux-arm
+            feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+          - os: macos-arm
+            feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+          - os: windows-arm
+            feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
 
     env:
       RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }}
