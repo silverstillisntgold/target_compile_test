@@ -46,11 +46,23 @@ jobs:
 
         exclude:
           - os: linux-arm
-            feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+            feature_level: x86-64-v2
+          - os: linux-arm
+            feature_level: x86-64-v3
+          - os: linux-arm
+            feature_level: x86-64-v4
           - os: macos-arm
-            feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+            feature_level: x86-64-v2
+          - os: macos-arm
+            feature_level: x86-64-v3
+          - os: macos-arm
+            feature_level: x86-64-v4
           - os: windows-arm
-            feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
+            feature_level: x86-64-v2
+          - os: windows-arm
+            feature_level: x86-64-v3
+          - os: windows-arm
+            feature_level: x86-64-v4
 
     env:
       RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }}
