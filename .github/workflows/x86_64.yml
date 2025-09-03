@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macos, windows, linux-arm, macos-arm, windows-arm]
+        #os: [linux, macos, windows, linux-arm, macos-arm, windows-arm]
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
         include:
           - os: linux
