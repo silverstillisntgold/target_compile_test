@@ -2,7 +2,7 @@ name: Compile binaries
 on: [pull_request, push, workflow_dispatch]
 
 jobs:
-  build_v2:
+  build:
     name: Build ${{ matrix.os }}-${{ matrix.feature_level }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -23,7 +23,7 @@ jobs:
 
           - os: windows
             runner: windows-2025
-            toolchain: x86_64-pc-windows-msvc
+            toolchain: x86_64-pc-windows-gnullvm
             artifact_path: target/release/target_compile_test.exe
 
           - os: linux-arm
@@ -40,7 +40,7 @@ jobs:
 
           - os: windows-arm
             runner: windows-11-arm
-            toolchain: aarch64-pc-windows-msvc
+            toolchain: aarch64-pc-windows-gnullvm
             artifact_path: target/release/target_compile_test.exe
             feature_level: generic
 
@@ -74,7 +74,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: stable-${{ matrix.toolchain }}
+          toolchain: nightly-${{ matrix.toolchain }}
 
       - name: Update dependencies
         run: cargo update
@@ -89,63 +89,3 @@ jobs:
           path: ${{ matrix.artifact_path }}
           if-no-files-found: error
           retention-days: 1
-
-  # build:
-  #   name: Build ${{ matrix.os_name }}-${{ matrix.feature_level }}
-  #   runs-on: ${{ matrix.runner }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os_name: [linux, windows, macos]
-  #       feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
-  #       include:
-  #         - os_name: linux
-  #           runner: ubuntu-24.04
-  #           toolchain: stable-x86_64-unknown-linux-gnu
-  #           artifact_path: target/release/target_compile_test
-  #           setup_mold: true
-
-  #         - os_name: windows
-  #           runner: windows-2025
-  #           # TODO: Move to gnullvm toolchain when it's stabilized in rust 1.90
-  #           toolchain: stable-x86_64-pc-windows-gnu
-  #           artifact_path: target/release/target_compile_test.exe
-  #           setup_mold: false
-  #           rustflags_extra: "-C linker=rust-lld"
-
-  #         - os_name: macos
-  #           runner: macos-13
-  #           toolchain: stable-x86_64-apple-darwin
-  #           artifact_path: target/release/target_compile_test
-  #           setup_mold: false
-
-  #   env:
-  #     # Avoid shell-specific writes to $GITHUB_ENV; just set it for the whole job
-  #     RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} ${{ matrix.rustflags_extra }}
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v5
-
-  #     - name: Install mold
-  #       if: ${{ matrix.setup_mold }}
-  #       uses: rui314/setup-mold@v1
-
-  #     - name: Install Rust
-  #       uses: dtolnay/rust-toolchain@master
-  #       with:
-  #         toolchain: ${{ matrix.toolchain }}
-
-  #     - name: Update dependencies
-  #       run: cargo update
-
-  #     - name: Build
-  #       run: cargo build --release
-
-  #     - name: Upload artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ matrix.os_name }}-${{ matrix.feature_level }}
-  #         path: ${{ matrix.artifact_path }}
-  #         if-no-files-found: error
-  #         retention-days: 1
