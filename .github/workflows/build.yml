@@ -57,10 +57,8 @@ jobs:
             feature_level: x86-64-v3
           - os: windows-arm
             feature_level: x86-64-v4
-
     env:
       RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
