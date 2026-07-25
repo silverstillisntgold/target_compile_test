@@ -12,29 +12,29 @@ jobs:
         feature_level: [x86-64-v2, x86-64-v3, x86-64-v4]
         include:
           - os: linux
-            runner: ubuntu-24.04
+            runner: ubuntu-26.04
             toolchain: x86_64-unknown-linux-gnu
             artifact_path: target/release/target_compile_test
           - os: macos
-            runner: macos-13 # Only free macos runner using x86
+            runner: macos-26-intel
             toolchain: x86_64-apple-darwin
             artifact_path: target/release/target_compile_test
           - os: windows
-            runner: windows-2025
+            runner: windows-2025-vs2026
             toolchain: x86_64-pc-windows-msvc
             artifact_path: target/release/target_compile_test.exe
           - os: linux-arm
-            runner: ubuntu-24.04-arm
+            runner: ubuntu-26.04-arm
             toolchain: aarch64-unknown-linux-gnu
             artifact_path: target/release/target_compile_test
             feature_level: generic
           - os: macos-arm
-            runner: macos-14 # Apparently macos-14 runners outperform macos-15
+            runner: macos-26
             toolchain: aarch64-apple-darwin
             artifact_path: target/release/target_compile_test
             feature_level: generic
           - os: windows-arm
-            runner: windows-11-arm
+            runner: windows-11-vs2026-arm
             toolchain: aarch64-pc-windows-msvc
             artifact_path: target/release/target_compile_test.exe
             feature_level: generic
@@ -61,17 +61,17 @@ jobs:
       RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable-${{ matrix.toolchain }}
       - name: Update dependencies
         run: cargo update
-      - name: Build
+      - name: Build binary
         run: cargo build --release
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.os }}-${{ matrix.feature_level }}
           path: ${{ matrix.artifact_path }}
