@@ -28,16 +28,19 @@ jobs:
             toolchain: aarch64-unknown-linux-gnu
             artifact_path: target/release/target_compile_test
             feature_level: generic
+            extra_rustflags: -C target-feature=+v8.2a
           - os: macos-arm
             runner: macos-26
             toolchain: aarch64-apple-darwin
             artifact_path: target/release/target_compile_test
             feature_level: generic
+            extra_rustflags: -C target-feature=+v8.2a
           - os: windows-arm
             runner: windows-11-vs2026-arm
             toolchain: aarch64-pc-windows-msvc
             artifact_path: target/release/target_compile_test.exe
             feature_level: generic
+            extra_rustflags: -C target-feature=+v8.2a
         exclude:
           - os: linux-arm
             feature_level: x86-64-v2
@@ -58,7 +61,7 @@ jobs:
           - os: windows-arm
             feature_level: x86-64-v4
     env:
-      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }}
+      RUSTFLAGS: -C target-cpu=${{ matrix.feature_level }} ${{ matrix.extra_rustflags }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
