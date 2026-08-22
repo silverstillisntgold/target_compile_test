@@ -1,14 +1,19 @@
 use fastxfix::CommonStr;
 use std::iter;
-use ya_rand::encoding::{Base16, Encoder};
-use ya_rand::{Generator, SecureGenerator, SecureRng};
+use ya_rand::{
+    SecureGenerator,
+    encoding::{Base16, Encoder},
+    new_rng_secure,
+};
 
 fn main() {
-    let mut rng = SecureRng::new();
+    let mut rng = new_rng_secure();
+
     let v = Vec::from_iter(iter::repeat_n(
         rng.text::<Base16>(Base16::MIN_LEN),
         Base16::MIN_LEN,
     ));
+
     match v.common_prefix_ref() {
         Some(s) => println!("common prefix of '{}' was randomly generated", s),
         None => println!("no common prefix was randomly generated"),
